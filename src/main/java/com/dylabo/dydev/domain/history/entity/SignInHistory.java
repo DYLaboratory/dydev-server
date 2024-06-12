@@ -1,7 +1,6 @@
-package com.dylabo.dydev.domain.website.entity;
+package com.dylabo.dydev.domain.history.entity;
 
-import com.dylabo.core.domain.base.entity.BaseCUEntity;
-import com.dylabo.dydev.domain.website.enums.WebSiteTypes;
+import com.dylabo.core.domain.base.entity.BaseCEntity;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -10,7 +9,6 @@ import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
 @SuperBuilder
-@DynamicUpdate
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @ToString
@@ -18,32 +16,21 @@ import org.hibernate.annotations.DynamicUpdate;
 @Getter
 @Entity
 @Table(
-        name = "web_site"
+        name = "sign_in_history"
 )
-public class WebSite extends BaseCUEntity {
+public class SignInHistory extends BaseCEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private final Long id = 0L;
 
-    @Enumerated(EnumType.STRING)
     @NotNull
-    @Column(length = 30)
-    private WebSiteTypes webSiteType;
+    @Column
+    private String accessIp;
 
     @NotNull
-    @Size(min = 1, max = 30)
+    @Size(min = 5, max = 100)
     @Column
-    private String name;
-
-    @NotNull
-    @Size(min = 1, max = 30)
-    @Column
-    private String description;
-
-    @NotNull
-    @Size(min = 10, max = 200)
-    @Column
-    private String url;
+    private String history;
 
 }
