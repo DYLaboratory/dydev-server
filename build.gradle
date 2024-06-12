@@ -43,6 +43,9 @@ dependencies {
     // db
     runtimeOnly 'org.postgresql:postgresql'
 
+    // modelmapper
+    implementation 'org.modelmapper:modelmapper:3.1.0'
+
     // test
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.security:spring-security-test'
