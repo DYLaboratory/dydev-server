@@ -1,4 +1,4 @@
-package com.dylabo.dydev.domain.admin.website.controller;
+package com.dylabo.dydev.domain.website.controller;
 
 import com.dylabo.dydev.common.constants.CommonApiUrls;
 import com.dylabo.dydev.domain.website.service.WebSiteService;

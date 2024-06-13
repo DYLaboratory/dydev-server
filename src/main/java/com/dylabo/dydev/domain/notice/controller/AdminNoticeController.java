@@ -1,4 +1,4 @@
-package com.dylabo.dydev.domain.admin.notice.controller;
+package com.dylabo.dydev.domain.notice.controller;
 
 import com.dylabo.dydev.common.constants.CommonApiUrls;
 import com.dylabo.dydev.domain.notice.service.NoticeService;
