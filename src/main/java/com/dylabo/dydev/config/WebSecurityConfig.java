@@ -46,18 +46,16 @@ public class WebSecurityConfig {
                 .cors(configurer -> corsConfigurationSource())
                 .csrf(AbstractHttpConfigurer::disable)
 
+                // admin need auth
                 .authorizeHttpRequests(request ->
                         request
-                                .requestMatchers(HttpMethod.POST, "/site")
-                                .authenticated()
-                                .requestMatchers(HttpMethod.PUT, "/site/*")
-                                .authenticated()
-                                .requestMatchers(HttpMethod.DELETE, "/site/*")
-                                .authenticated()
+                                .requestMatchers("/admin*").authenticated()
                 )
 
+                // permit all
                 .authorizeHttpRequests(request ->
-                        request.anyRequest().permitAll()
+                        request
+                                .anyRequest().permitAll()
                 )
 //                .formLogin(config ->
 //                        config

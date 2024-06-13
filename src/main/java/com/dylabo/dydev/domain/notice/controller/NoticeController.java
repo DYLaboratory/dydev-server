@@ -28,21 +28,4 @@ public class NoticeController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("")
-    public ResponseEntity<NoticeResponseDTO> doSetInsertNotice(@RequestBody NoticeRequestDTO noticeRequestDTO) {
-        return new ResponseEntity<>(HttpStatus.CREATED);
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<NoticeResponseDTO> doSetUpdateNoticeById(
-            @PathVariable("id") Long id,
-            @RequestBody NoticeRequestDTO noticeRequestDTO) {
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
-    @DeleteMapping("/{id}")
-    public ResponseEntity<Long> doSetDeleteNoticeById(@PathVariable("id") Long id) {
-        return new ResponseEntity<>(HttpStatus.OK);
-    }
-
 }
