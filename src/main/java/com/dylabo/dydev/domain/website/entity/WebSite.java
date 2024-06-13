@@ -42,7 +42,7 @@ public class WebSite extends BaseCUEntity {
     private String description;
 
     @NotNull
-    @Size(min = 10, max = 200)
+    @Size(min = 1, max = 200)
     @Column
     private String url;
 

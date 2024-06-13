@@ -2,12 +2,12 @@ package com.dylabo.dydev.common.provider;
 
 import com.dylabo.core.common.exception.ApiException;
 import com.dylabo.core.common.exception.message.ErrorMessage;
-import com.dylabo.dydev.domain.user.entity.User;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.AuthenticationException;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -24,7 +24,7 @@ public class AuthProvider implements AuthenticationProvider {
         String userId = authentication.getName();
         String password = (String) authentication.getCredentials();
 
-        User user = (User) userDetailsService.loadUserByUsername(userId);
+        UserDetails user = userDetailsService.loadUserByUsername(userId);
 
         // 1. 비밀번호 체크
         if (!passwordEncoder.matches(password, user.getPassword())) {
