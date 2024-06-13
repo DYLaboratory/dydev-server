@@ -37,7 +37,7 @@ public class WebSiteServiceImpl implements WebSiteService {
 
     @Override
     public List<WebSiteResponseDto> getWebSiteList() {
-        List<WebSite> webSiteList = webSiteRepository.findAll();
+        List<WebSite> webSiteList = webSiteRepository.findAllBySort();
 
         return webSiteList.stream()
                 .map(webSite -> modelMapper.map(webSite, WebSiteResponseDto.class))
