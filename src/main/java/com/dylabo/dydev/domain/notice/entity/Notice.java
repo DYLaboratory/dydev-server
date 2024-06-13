@@ -3,6 +3,7 @@ package com.dylabo.dydev.domain.notice.entity;
 import com.dylabo.core.domain.base.entity.BaseCUEntity;
 import com.dylabo.dydev.domain.notice.enums.NoticeTypes;
 import jakarta.persistence.*;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -19,14 +20,17 @@ public class Notice extends BaseCUEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private final Long id = 0L;
 
-    @Column
     @Enumerated(EnumType.STRING)
+    @NotNull
+    @Column(length = 30)
     private NoticeTypes noticeType;
 
-    @Column(nullable = false, length = 200)
+    @NotNull
+    @Column(length = 200)
     private String title;
 
-    @Column(nullable = false, length = 40000)
+    @NotNull
+    @Column(length = 40000)
     private String content;
 
     @Column(columnDefinition = "integer default 0")
