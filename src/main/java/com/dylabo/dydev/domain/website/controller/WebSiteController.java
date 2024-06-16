@@ -15,7 +15,7 @@ import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping(CommonApiUrls.API_PACKAGE_WEB_SITE)
+@RequestMapping(CommonApiUrls.API_PACKAGE_PREFIX_COMMON + CommonApiUrls.API_PACKAGE_WEB_SITE)
 public class WebSiteController {
 
     private final WebSiteService webSiteService;

@@ -11,4 +11,6 @@ public interface WebSiteRepository extends JpaRepository<WebSite, Long> {
             + "where 1=1 "
             + "order by ws.updateDateTime desc")
     List<WebSite> findAllBySort();
+
+    void deleteByIdIn(List<Long> idList);
 }

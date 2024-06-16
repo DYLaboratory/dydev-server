@@ -1,5 +1,6 @@
 package com.dylabo.dydev.domain.external.controller;
 
+import com.dylabo.dydev.common.constants.CommonApiUrls;
 import com.dylabo.dydev.domain.external.service.ExternalAPIService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -11,7 +12,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/external")
+@RequestMapping(CommonApiUrls.API_PACKAGE_PREFIX_COMMON + CommonApiUrls.API_PACKAGE_EXTERNAL)
 public class ExternalAPIController {
 
     private final ExternalAPIService externalAPIService;

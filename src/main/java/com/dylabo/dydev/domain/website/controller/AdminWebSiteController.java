@@ -11,6 +11,8 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping(CommonApiUrls.API_PACKAGE_PREFIX_ADMIN + CommonApiUrls.API_PACKAGE_WEB_SITE)
@@ -36,6 +38,11 @@ public class AdminWebSiteController {
     @DeleteMapping("/{id}")
     public ResponseEntity<Long> doSetDeleteWebSiteById(@PathVariable("id") Long id) {
         return new ResponseEntity<>(webSiteService.setDeleteWebSiteById(id), HttpStatus.OK);
+    }
+
+    @DeleteMapping("/list")
+    public ResponseEntity<List<Long>> doSetDeleteWebSiteListById(@RequestParam("list") List<Long> idList) {
+        return new ResponseEntity<>(webSiteService.setDeleteWebSiteByIdList(idList), HttpStatus.OK);
     }
 
 }

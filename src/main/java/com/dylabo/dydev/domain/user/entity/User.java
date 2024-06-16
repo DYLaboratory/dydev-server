@@ -2,6 +2,7 @@ package com.dylabo.dydev.domain.user.entity;
 
 import com.dylabo.core.common.converters.BCryptoConverter;
 import com.dylabo.core.domain.base.entity.BaseCUDEntity;
+import com.dylabo.dydev.domain.user.enums.UserTypes;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
@@ -9,11 +10,12 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 
 @SuperBuilder
 @DynamicUpdate
@@ -36,6 +38,11 @@ public class User extends BaseCUDEntity implements UserDetails {
     @Size(min = 5, max = 30)
     @Column
     private String userId;
+
+    @Enumerated(EnumType.STRING)
+    @NotNull
+    @Column(length = 10)
+    private UserTypes userType;
 
     @NotNull
     @Size(min = 2, max = 30)
@@ -81,7 +88,7 @@ public class User extends BaseCUDEntity implements UserDetails {
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        return new ArrayList<>();
+        return List.of(new SimpleGrantedAuthority("ROLE_" + this.userType.getKey()));
     }
 
     @Override
@@ -118,8 +125,17 @@ public class User extends BaseCUDEntity implements UserDetails {
         this.loginAttemptCount++;
     }
 
+    public void clearLoginAttemptCount() {
+        this.loginAttemptCount = 0;
+    }
+
     public void updateLastLoginDateTime() {
         this.lastLoginDateTime = LocalDateTime.now();
+    }
+
+    public void successLogin() {
+        clearLoginAttemptCount();
+        updateLastLoginDateTime();
     }
 
 }

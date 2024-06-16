@@ -1,7 +1,7 @@
 package com.dylabo.dydev.domain.website.service.impl;
 
 import com.dylabo.core.common.exception.ApiException;
-import com.dylabo.core.common.exception.message.ErrorMessage;
+import com.dylabo.dydev.common.exception.DydevErrorMessage;
 import com.dylabo.dydev.domain.website.entity.WebSite;
 import com.dylabo.dydev.domain.website.repository.WebSiteRepository;
 import com.dylabo.dydev.domain.website.service.WebSiteService;
@@ -27,7 +27,7 @@ public class WebSiteServiceImpl implements WebSiteService {
 
     private WebSite getWebSiteEntityById(Long id) {
         return webSiteRepository.findById(id)
-                .orElseThrow(() -> new ApiException(ErrorMessage.USER_NOT_FOUND));
+                .orElseThrow(() -> new ApiException(DydevErrorMessage.WEB_SITE_NOT_FOUND));
     }
 
     @Override
@@ -67,9 +67,7 @@ public class WebSiteServiceImpl implements WebSiteService {
     @Override
     @Transactional
     public Long setDeleteWebSiteById(Long id) {
-        WebSite webSite = getWebSiteEntityById(id);
-
-        webSiteRepository.delete(webSite);
+        webSiteRepository.deleteById(id);
 
         return id;
     }
@@ -77,6 +75,8 @@ public class WebSiteServiceImpl implements WebSiteService {
     @Override
     @Transactional
     public List<Long> setDeleteWebSiteByIdList(List<Long> idList) {
-        return null;
+        webSiteRepository.deleteByIdIn(idList);
+
+        return idList;
     }
 }

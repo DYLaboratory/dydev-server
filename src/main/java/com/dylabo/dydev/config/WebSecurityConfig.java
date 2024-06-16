@@ -1,26 +1,19 @@
 package com.dylabo.dydev.config;
 
-import com.dylabo.dydev.common.filter.AuthProcessingFilter;
-import com.dylabo.dydev.common.filter.ExceptionHandlerFilter;
 import com.dylabo.dydev.common.handler.AuthEntryPoint;
-import com.dylabo.dydev.common.handler.AuthSuccessHandler;
 import com.dylabo.dydev.common.handler.DeniedHandler;
+import com.dylabo.dydev.domain.user.enums.UserTypes;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
-import org.springframework.security.web.context.DelegatingSecurityContextRepository;
-import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
-import org.springframework.security.web.context.RequestAttributeSecurityContextRepository;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
@@ -34,8 +27,6 @@ import java.util.List;
 @RequiredArgsConstructor
 public class WebSecurityConfig {
 
-    private final AuthenticationConfiguration authenticationConfiguration;
-    private final AuthSuccessHandler authSuccessHandler;
     private final AuthEntryPoint authEntryPoint;
     private final DeniedHandler deniedHandler;
 
@@ -45,28 +36,37 @@ public class WebSecurityConfig {
         http
                 .cors(configurer -> corsConfigurationSource())
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // admin need auth
-                .authorizeHttpRequests(request ->
-                        request
-                                .requestMatchers("/admin*").authenticated()
-                )
-
-                // permit all
-                .authorizeHttpRequests(request ->
-                        request
-                                .anyRequest().permitAll()
-                )
-//                .formLogin(config ->
-//                        config
-//                                .loginProcessingUrl("/auth/sign-in")
-//                                .usernameParameter("userId")
-//                                .successHandler(new LoginSuccessHandler())
+//                .csrf(csrf ->
+//                        csrf
+//                                .csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse())
 //                )
-//                .logout(config -> config.logoutUrl("/auth/sign-out"))
 
-                .addFilterBefore(new ExceptionHandlerFilter(), UsernamePasswordAuthenticationFilter.class)
-                .addFilterBefore(authFilter(), UsernamePasswordAuthenticationFilter.class)
+                .sessionManagement(config ->
+                        config
+                                .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // 세션이 필요하면 생성하도록 세팅
+                                .maximumSessions(1)
+                )
+
+                // auth
+                .authorizeHttpRequests(request ->
+                        request
+                                // auth
+                                .requestMatchers("/auth/sign-in", "/session/user")
+                                .permitAll()
+
+                                // admin
+                                .requestMatchers("/admin/**")
+                                .hasAnyRole(UserTypes.ADMIN.getKey(), UserTypes.SUPER.getKey())
+
+                                // common
+                                .requestMatchers("/common/**")
+                                .permitAll()
+
+                                // any request
+                                .anyRequest()
+                                .authenticated()
+                )
+
                 .exceptionHandling(config ->
                         config
                                 .authenticationEntryPoint(authEntryPoint)
@@ -79,7 +79,7 @@ public class WebSecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://dylabo.me"));
+        configuration.setAllowedOrigins(List.of("http://localhost:3000", "https://dylabo.me", "https://www.dylabo.me"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
         configuration.setAllowCredentials(true);
         configuration.setMaxAge(3600L);
@@ -92,22 +92,6 @@ public class WebSecurityConfig {
         source.registerCorsConfiguration("/**", configuration);
 
         return source;
-    }
-
-    @Bean
-    public AuthProcessingFilter authFilter() throws Exception {
-        AuthProcessingFilter authProcessingFilter = new AuthProcessingFilter();
-        authProcessingFilter.setAuthenticationManager(authenticationConfiguration.getAuthenticationManager());
-        authProcessingFilter.setAuthenticationSuccessHandler(authSuccessHandler);
-
-        // REST API 사용을 위해 추가
-        authProcessingFilter.setSecurityContextRepository(
-                new DelegatingSecurityContextRepository(
-                        new RequestAttributeSecurityContextRepository(),
-                        new HttpSessionSecurityContextRepository()
-                ));
-
-        return authProcessingFilter;
     }
 
 }

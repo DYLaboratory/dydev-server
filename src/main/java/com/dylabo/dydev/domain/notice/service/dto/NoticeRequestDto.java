@@ -1,11 +1,11 @@
 package com.dylabo.dydev.domain.notice.service.dto;
 
-import com.dylabo.core.domain.base.dto.BaseCUDto;
 import com.dylabo.dydev.domain.notice.enums.NoticeTypes;
 import lombok.Getter;
+import lombok.Setter;
 
 @Getter
-public class NoticeDTO extends BaseCUDto {
+public class NoticeRequestDto {
 
     private NoticeTypes noticeType;
 
@@ -13,6 +13,10 @@ public class NoticeDTO extends BaseCUDto {
 
     private String content;
 
-    private Integer viewCount;
+    @Getter
+    @Setter
+    public static class Search {
+
+    }
 
 }

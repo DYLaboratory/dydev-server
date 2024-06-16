@@ -1,17 +1,17 @@
-package com.dylabo.dydev.domain.notice.enums;
+package com.dylabo.dydev.domain.user.enums;
 
 import com.dylabo.core.common.annotation.EnumFindable;
 import com.dylabo.core.common.enums.EnumMapperType;
 
 @EnumFindable
-public enum NoticeTypes implements EnumMapperType {
-    NOTICE("NOTICE"),
-    VERSION("VERSION"),
-    ETC("ETC");
+public enum UserTypes implements EnumMapperType {
+    USER("USER"),
+    ADMIN("ADMIN"),
+    SUPER("SUPER");
 
-    private final String value;
+    private String value;
 
-    NoticeTypes(String value) {
+    UserTypes(String value) {
         this.value = value;
     }
 
