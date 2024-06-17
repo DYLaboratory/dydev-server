@@ -1,7 +1,9 @@
 package com.dylabo.dydev.domain.external.service;
 
+import com.dylabo.dydev.domain.external.service.dto.WeatherDto;
+
 public interface ExternalAPIService {
 
-    String getOpenWeather(String city);
+    WeatherDto getOpenWeather(String city);
 
 }

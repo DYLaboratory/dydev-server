@@ -2,6 +2,7 @@ package com.dylabo.dydev.domain.external.controller;
 
 import com.dylabo.dydev.common.constants.CommonApiUrls;
 import com.dylabo.dydev.domain.external.service.ExternalAPIService;
+import com.dylabo.dydev.domain.external.service.dto.WeatherDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ public class ExternalAPIController {
     private final ExternalAPIService externalAPIService;
 
     @GetMapping("/weather")
-    public ResponseEntity<String> doGetOpenWeather(@RequestParam("city") String city) {
+    public ResponseEntity<WeatherDto> doGetOpenWeather(@RequestParam("city") String city) {
         return new ResponseEntity<>(externalAPIService.getOpenWeather(city), HttpStatus.OK);
     }
 

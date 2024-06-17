@@ -10,10 +10,10 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class ExternalProperties {
 
-    @Value("${external.url.openweather}")
+    @Value("${external.openweather.url}")
     private String openWeatherUrl;
 
-    @Value("${external.api-key.openweather}")
+    @Value("${external.openweather.api-key}")
     private String openWeatherApiKey;
 
 }
