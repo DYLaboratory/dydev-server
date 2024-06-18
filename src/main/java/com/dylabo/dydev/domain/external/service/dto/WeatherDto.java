@@ -8,4 +8,5 @@ import lombok.Getter;
 public class WeatherDto {
     private String present;
     private String forecast;
+    private String dust;
 }
