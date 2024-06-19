@@ -7,7 +7,11 @@ import java.io.IOException;
 
 public interface ExternalAPIService {
 
-    WeatherDto getWeatherData(CityTypes city) throws IOException;
+    WeatherDto getWeatherDustData(CityTypes city, Boolean weather, Boolean dust) throws IOException;
+
+    String getPresentWeather(CityTypes city) throws IOException;
+
+    String getForecastWeather(CityTypes city) throws IOException;
 
     String getDustData(CityTypes city) throws IOException;
 

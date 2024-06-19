@@ -1,10 +1,12 @@
 package com.dylabo.dydev.domain.external.service.dto;
 
-import lombok.Builder;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
 @Getter
-@Builder
+@Setter
+@NoArgsConstructor
 public class WeatherDto {
     private String present;
     private String forecast;

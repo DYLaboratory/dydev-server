@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,7 +20,7 @@ public class AdminNoticeController {
 
     @PostMapping("")
     public ResponseEntity<NoticeResponseDto> doSetInsertNotice(
-            @RequestBody NoticeRequestDto noticeRequestDto,
+            @Validated @RequestBody NoticeRequestDto noticeRequestDto,
             BindingResult bindingResult) {
         return new ResponseEntity<>(noticeService.setInsertNotice(noticeRequestDto), HttpStatus.CREATED);
     }
@@ -27,7 +28,7 @@ public class AdminNoticeController {
     @PutMapping("/{id}")
     public ResponseEntity<NoticeResponseDto> doSetUpdateNoticeById(
             @PathVariable("id") Long id,
-            @RequestBody NoticeRequestDto noticeRequestDto,
+            @Validated @RequestBody NoticeRequestDto noticeRequestDto,
             BindingResult bindingResult) {
         return new ResponseEntity<>(noticeService.setUpdateNotice(id, noticeRequestDto), HttpStatus.OK);
     }
