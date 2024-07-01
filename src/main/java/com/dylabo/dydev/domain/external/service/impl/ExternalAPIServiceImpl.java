@@ -74,11 +74,10 @@ public class ExternalAPIServiceImpl implements ExternalAPIService {
         String url = UriComponentsBuilder.fromHttpUrl(baseUrl + "getCtprvnRltmMesureDnsty")
                 .encode(StandardCharsets.UTF_8)
                 .queryParam("serviceKey", externalProperties.getDustApiKeyEncode())
-                .queryParam("sidoName", city.getValue())
 //                .queryParam("sidoName", city.getValue())
                 .queryParam("returnType", "json")
                 .queryParam("ver", "1.1")
-                .toUriString();
+                .toUriString().concat("&sidoName=" + city.getValue());
 
         String result;
 

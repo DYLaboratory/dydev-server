@@ -1,6 +1,7 @@
 package com.dylabo.dydev.domain.user.service;
 
 import com.dylabo.dydev.domain.user.entity.User;
+import com.dylabo.dydev.domain.user.service.dto.UserRequestDto;
 import com.dylabo.dydev.domain.user.service.dto.UserResponseDto;
 
 import java.util.Optional;
@@ -12,5 +13,7 @@ public interface UserService {
     UserResponseDto getUserById(Long id);
 
     UserResponseDto getUserByUserId(String userId);
+
+    String setUpdateLoginUserPassword(UserRequestDto.NewPassword requestDto);
 
 }

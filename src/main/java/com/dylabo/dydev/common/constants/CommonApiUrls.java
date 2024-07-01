@@ -12,8 +12,10 @@ public class CommonApiUrls {
     public static final String API_PACKAGE_PREFIX_COMMON = "/common";
 
     public static final String API_PACKAGE_SESSION  = "/session";
-    public static final String API_PACKAGE_EXTERNAL  = "/external";
+    public static final String API_PACKAGE_USER  = "/user";
+    public static final String API_PACKAGE_EXTERNAL = "/external";
     public static final String API_PACKAGE_NOTICE   = "/notice";
     public static final String API_PACKAGE_WEB_SITE = "/web-site";
+    public static final String API_PACKAGE_LOGIN_HISTORY = "/login-history";
 
 }

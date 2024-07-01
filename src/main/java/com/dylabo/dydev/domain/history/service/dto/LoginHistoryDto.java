@@ -1,13 +1,14 @@
 package com.dylabo.dydev.domain.history.service.dto;
 
 import com.dylabo.core.domain.base.dto.BaseCDto;
+import com.dylabo.dydev.domain.history.enums.LoginHistoryMessage;
 import lombok.Getter;
 
 @Getter
-public class SignInHistoryDto extends BaseCDto {
+public class LoginHistoryDto extends BaseCDto {
 
     private String accessIp;
 
-    private String history;
+    private LoginHistoryMessage history;
 
 }

@@ -133,6 +133,10 @@ public class User extends BaseCUDEntity implements UserDetails {
         this.lastLoginDateTime = LocalDateTime.now();
     }
 
+    public void updatePassword(String newPassword) {
+        this.password = newPassword;
+    }
+
     public void successLogin() {
         clearLoginAttemptCount();
         updateLastLoginDateTime();

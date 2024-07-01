@@ -8,6 +8,8 @@ import com.dylabo.dydev.common.session.SessionComponent;
 import com.dylabo.dydev.common.session.SessionDto;
 import com.dylabo.dydev.domain.auth.service.AuthService;
 import com.dylabo.dydev.domain.auth.service.dto.AuthDto;
+import com.dylabo.dydev.domain.history.enums.LoginHistoryMessage;
+import com.dylabo.dydev.domain.history.service.LoginHistoryService;
 import com.dylabo.dydev.domain.user.entity.User;
 import com.dylabo.dydev.domain.user.enums.UserTypes;
 import com.dylabo.dydev.domain.user.service.UserService;
@@ -28,6 +30,8 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserService userService;
 
+    private final LoginHistoryService loginHistoryService;
+
     private final SessionComponent sessionComponent;
 
     private final PasswordEncoder passwordEncoder;
@@ -44,7 +48,7 @@ public class AuthServiceImpl implements AuthService {
         // 값이 비었을 경우
         if (CommonStringUtils.nonHasText(userId)
                 || CommonStringUtils.nonHasText(password)) {
-            throw new IllegalArgumentException("username or password is empty");
+            throw new IllegalArgumentException("userid or password is empty");
         }
 
         // 1. 유저 조회
@@ -53,12 +57,11 @@ public class AuthServiceImpl implements AuthService {
 
         // 2. 비밀번호 확인
         if (!passwordEncoder.matches(password, user.getPassword())) {
+            loginHistoryService.setInsertLoginHistory(userId, LoginHistoryMessage.LOGIN_PASSWORD_FAIL);
             throw new ApiException(ErrorMessage.INVALID_USER_ID_AND_PASSWORD);
         }
 
         // 여기까지 오면 로그인 성공
-        // 마지막 로그인일시 업데이트
-        user.updateLastLoginDateTime();
 
         // security 등록
         UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(userId, null, user.getAuthorities());
@@ -76,6 +79,12 @@ public class AuthServiceImpl implements AuthService {
 
         sessionComponent.setSession(sessionDto);
         sessionComponent.setSessionAttribute(HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY, SecurityContextHolder.getContext());
+
+        // 마지막 로그인일시 업데이트
+        user.successLogin();
+
+        // 로그인 내역
+        loginHistoryService.setInsertLoginHistory(userId, LoginHistoryMessage.LOGIN_SUCCESS);
 
         return sessionDto;
     }

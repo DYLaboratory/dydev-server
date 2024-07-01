@@ -21,8 +21,23 @@ public class ExternalAPIController {
 
     private final ExternalAPIService externalAPIService;
 
+    @GetMapping("/weather")
+    public ResponseEntity<String> doGetOpenWeather(@RequestParam("city") CityTypes city) throws IOException {
+        return new ResponseEntity<>(externalAPIService.getPresentWeather(city), HttpStatus.OK);
+    }
+
+    @GetMapping("/forecast")
+    public ResponseEntity<String> doGetForecast(@RequestParam("city") CityTypes city) throws IOException {
+        return new ResponseEntity<>(externalAPIService.getForecastWeather(city), HttpStatus.OK);
+    }
+
+    @GetMapping("/dust")
+    public ResponseEntity<String> doGetDust(@RequestParam("city") CityTypes city) throws IOException {
+        return new ResponseEntity<>(externalAPIService.getDustData(city), HttpStatus.OK);
+    }
+
     @GetMapping("/weather-dust")
-    public ResponseEntity<WeatherDto> doGetOpenWeather(
+    public ResponseEntity<WeatherDto> doGetOpenWeatherDust(
             @RequestParam("city") CityTypes city,
             @RequestParam("weather") Boolean weather,
             @RequestParam("dust") Boolean dust) throws IOException {

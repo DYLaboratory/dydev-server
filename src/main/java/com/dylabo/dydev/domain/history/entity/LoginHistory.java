@@ -1,12 +1,12 @@
 package com.dylabo.dydev.domain.history.entity;
 
 import com.dylabo.core.domain.base.entity.BaseCEntity;
+import com.dylabo.dydev.domain.history.enums.LoginHistoryMessage;
+import com.dylabo.dydev.domain.user.entity.User;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
-import org.hibernate.annotations.DynamicUpdate;
 
 @SuperBuilder
 @AllArgsConstructor(access = AccessLevel.PRIVATE)
@@ -16,21 +16,25 @@ import org.hibernate.annotations.DynamicUpdate;
 @Getter
 @Entity
 @Table(
-        name = "sign_in_history"
+        name = "login_history"
 )
-public class SignInHistory extends BaseCEntity {
+public class LoginHistory extends BaseCEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private final Long id = 0L;
 
+    @ManyToOne
+    @JoinColumn(name = "access_user_id", foreignKey = @ForeignKey(name = "FK_USER_LOGIN_HISTORY"))
+    private User user;
+
     @NotNull
     @Column
     private String accessIp;
 
+    @Enumerated(EnumType.STRING)
     @NotNull
-    @Size(min = 5, max = 100)
     @Column
-    private String history;
+    private LoginHistoryMessage history;
 
 }
