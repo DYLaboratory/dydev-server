@@ -10,10 +10,12 @@ import com.dylabo.dydev.domain.notice.service.dto.NoticeResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,12 +38,14 @@ public class NoticeServiceImpl implements NoticeService {
     }
 
     @Override
-    public List<NoticeResponseDto> getNoticeList(NoticeRequestDto.Search search) {
-        List<Notice> noticeList = noticeRepository.findAllBySort();
+    public Page<NoticeResponseDto> getNoticeList(NoticeRequestDto.Search search, Pageable pageable) {
+        Page<Notice> noticeList = noticeRepository.findNoticeListWithSearchAndPaging(search, pageable);
 
-        return noticeList.stream()
+        return new PageImpl<>(noticeList.stream()
                 .map(notice -> modelMapper.map(notice, NoticeResponseDto.class))
-                .collect(Collectors.toList());
+                .collect(Collectors.toList()),
+                noticeList.getPageable(),
+                noticeList.getTotalElements());
     }
 
     @Override
