@@ -1,21 +1,21 @@
 package com.dylabo.dydev.common.components;
 
-import com.dylabo.core.common.constants.CommonConstants;
 import com.dylabo.core.common.utils.ErrorLogUtils;
+import com.dylabo.dydev.domain.file.service.dto.FileContentDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
-import software.amazon.awssdk.services.s3.model.S3Object;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.file.Paths;
 
 /**
  * AWS S3 관련 컴포넌트
@@ -35,12 +35,10 @@ public class AWSS3Component {
      *
      * @param filePath
      * @param fileName
-     * @param fileExt
-     * @throws IOException
      */
-    public byte[] getDownloadS3FileByName(String filePath, String fileName, String fileExt) {
+    public byte[] getDownloadS3FileByName(String filePath, String fileName) {
         // 파일 경로 + 이름
-        fileName = filePath + fileName + CommonConstants.DOT + fileExt;
+        fileName = filePath + fileName;
 
         GetObjectRequest getObjectRequest = GetObjectRequest.builder()
                 .bucket(bucketName)
@@ -63,13 +61,19 @@ public class AWSS3Component {
         }
     }
 
-    public void setUploadS3File(String filePath, String fileName) {
+    public void setUploadS3File(MultipartFile uploadFile, FileContentDto fileContentDto) throws IOException {
+        String filePath = fileContentDto.getFilePath()
+                + File.separator
+                + fileContentDto.getSystemFileName();
+
+
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
-                .key(fileName)
+                .key(filePath)
                 .build();
 
-
+        // upload
+        s3Client.putObject(putObjectRequest, RequestBody.fromInputStream(uploadFile.getInputStream(), fileContentDto.getFileSize()));
     }
 
 }

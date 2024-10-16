@@ -7,6 +7,9 @@ import com.fasterxml.jackson.annotation.JsonFormat;
         shape = JsonFormat.Shape.OBJECT
 )
 public enum DydevErrorMessage implements ErrorMessageIF {
+    EMPTY_FILE(400, "Empty File"),
+
+    FILE_NOT_FOUND(400, "File Not Found"),
     FEED_NOT_FOUND(400, "Feed Not Found"),
     NOTICE_NOT_FOUND(400, "Notice Not Found"),
     WEB_SITE_NOT_FOUND(400, "Web Site Not Found");
