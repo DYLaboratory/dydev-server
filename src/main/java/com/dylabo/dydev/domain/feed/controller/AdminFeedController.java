@@ -10,6 +10,9 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @RestController
 @RequiredArgsConstructor
@@ -20,9 +23,10 @@ public class AdminFeedController {
 
     @PostMapping("")
     public ResponseEntity<FeedResponseDto> doSetInsertFeed(
-            @Validated @RequestBody FeedRequestDto feedRequestDto,
+            @Validated @RequestPart(name = "feed", required = true) FeedRequestDto feedRequestDto,
+            @RequestPart(name = "uploadFiles") List<MultipartFile> uploadFiles,
             BindingResult bindingResult) {
-        return new ResponseEntity<>(feedService.setInsertFeed(feedRequestDto), HttpStatus.CREATED);
+        return new ResponseEntity<>(feedService.setInsertFeed(feedRequestDto, uploadFiles), HttpStatus.CREATED);
     }
 
     @DeleteMapping("/{id}")
