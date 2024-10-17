@@ -8,10 +8,12 @@ import java.io.IOException;
 
 public interface FileService {
 
+    FileContentResponseDto getFileContentById(Long fileId);
+
     FileContentResponseDto.FileDownloadDto getDownloadFile(Long fileId);
 
-    FileContentResponseDto setUploadFile(FileTypes fileTypes, MultipartFile uploadFile);
+    FileContentResponseDto setUploadFile(FileTypes fileType, MultipartFile uploadFile);
 
-    FileContentResponseDto setUploadFile(FileTypes fileTypes, MultipartFile uploadFile, boolean isPrivate);
+    FileContentResponseDto setUploadFile(FileTypes fileType, MultipartFile uploadFile, Long relationId);
 
 }

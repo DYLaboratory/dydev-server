@@ -1,6 +1,7 @@
 package com.dylabo.dydev.domain.file.entity;
 
 import com.dylabo.core.domain.base.entity.BaseCEntity;
+import com.dylabo.dydev.domain.file.enums.FileTypes;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -15,30 +16,35 @@ import org.hibernate.annotations.DynamicUpdate;
 @ToString
 @EqualsAndHashCode(callSuper = false)
 @Entity
-public class FileContent extends BaseCEntity {
+public class FileContent extends BaseCEntity implements Comparable<FileContent> {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private final Long id = 0L;
 
+    @Enumerated(EnumType.STRING)
     @NotNull
-    @Column
+    @Column(length = 30)
+    private FileTypes fileType;
+
+    @NotNull
+    @Column(length = 200)
     private String originalFileName;
 
     @NotNull
-    @Column
+    @Column(length = 200)
     private String systemFileName;
 
     @NotNull
-    @Column
+    @Column(length = 200)
     private String filePath;
 
     @NotNull
-    @Column
+    @Column(length = 10)
     private String fileExt;
 
     @NotNull
-    @Column
+    @Column(length = 100)
     private String contentType;
 
     @NotNull
@@ -50,19 +56,23 @@ public class FileContent extends BaseCEntity {
     @Builder.Default
     private Boolean isPrivate = false;
 
-    @Column(columnDefinition = "integer default 0")
+    @Column(columnDefinition = "integer default 1")
     @Builder.Default
-    private Integer relationCount = 0;
+    private Integer seq = 1;
 
-    public void increaseRelationCount() {
-        ++this.relationCount;
-    }
-
-    public void decreaseRelationCount() {
-        --this.relationCount;
-    }
+    @Column
+    private Long relationId;
 
     public void setPrivate(Boolean aPrivate) {
         isPrivate = aPrivate;
+    }
+
+    public void setRelationId(Long relationId) {
+        this.relationId = relationId;
+    }
+
+    @Override
+    public int compareTo(FileContent o) {
+        return this.seq.compareTo(o.getSeq());
     }
 }

@@ -22,6 +22,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.time.LocalDate;
 import java.util.UUID;
 
 @Service
@@ -35,9 +36,21 @@ public class FileServiceImpl implements FileService {
 
     private final ModelMapper modelMapper;
 
-    public FileContentResponseDto.FileDownloadDto getDownloadFile(Long fileId) {
-        FileContent fileContent = fileContentRepository.findById(fileId)
+    private FileContent getEntityFileContentById(Long fileId) {
+        return fileContentRepository.findById(fileId)
                 .orElseThrow(() -> new ApiException(DydevErrorMessage.FILE_NOT_FOUND));
+    }
+
+    @Override
+    public FileContentResponseDto getFileContentById(Long fileId) {
+        FileContent fileContent = getEntityFileContentById(fileId);
+
+        return modelMapper.map(fileContent, FileContentResponseDto.class);
+    }
+
+    @Override
+    public FileContentResponseDto.FileDownloadDto getDownloadFile(Long fileId) {
+        FileContent fileContent = getEntityFileContentById(fileId);
 
         String encodeFileName = null;
         try {
@@ -54,25 +67,33 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional
-    public FileContentResponseDto setUploadFile(FileTypes fileTypes, MultipartFile uploadFile) {
-        return setUploadFile(fileTypes, uploadFile, false);
+    public FileContentResponseDto setUploadFile(FileTypes fileType, MultipartFile uploadFile) {
+        return setUploadFile(fileType, uploadFile, null);
     }
 
     @Override
     @Transactional
-    public FileContentResponseDto setUploadFile(FileTypes fileTypes, MultipartFile uploadFile, boolean isPrivate) {
+    public FileContentResponseDto setUploadFile(FileTypes fileType, MultipartFile uploadFile, Long relationId) {
         if (uploadFile.isEmpty() || CommonObjectUtils.isNull(uploadFile.getOriginalFilename())) {
             throw new ApiException(DydevErrorMessage.EMPTY_FILE);
         }
 
+        // file type 없을 경우 임시 파일로 저장
+        if (CommonObjectUtils.isNull(fileType)) {
+            fileType = FileTypes.TEMP;
+            relationId = null; // file type 없이 relation 불가능
+        }
+
         // file info
         String originalFileName = uploadFile.getOriginalFilename(); // 원본 파일명
-        String fileExt = originalFileName.substring(originalFileName.lastIndexOf(".") + 1); // 확장자명
+        String fileExt = originalFileName.substring(originalFileName.lastIndexOf(".") + 1); // 확장자명 (확장자 없는 파일 등록 불가)
         String systemFileName = UUID.randomUUID().toString().replaceAll("-", "")
                 + CommonConstants.UNDER_BAR
                 + System.currentTimeMillis()
                 + CommonConstants.DOT
                 + fileExt; // 시스템 파일명
+        String filePath = generateFilePath(fileType); // 파일 경로
+
         String contentType = uploadFile.getContentType();
         long fileSize = uploadFile.getSize();
 
@@ -80,27 +101,45 @@ public class FileServiceImpl implements FileService {
         FileContent fileContent = FileContent.builder()
                 .originalFileName(originalFileName)
                 .systemFileName(systemFileName)
-                .filePath(fileTypes.getPath())
+                .filePath(filePath)
                 .fileExt(fileExt)
                 .contentType(contentType)
                 .fileSize(fileSize)
-                .isPrivate(isPrivate)
+                .fileType(fileType)
+                .relationId(relationId)
                 .build();
 
         // save db
         fileContent = fileContentRepository.save(fileContent);
 
-        FileContentResponseDto fileContentDto = modelMapper.map(fileContent, FileContentResponseDto.class);
+        FileContentResponseDto fileContentResponseDto = modelMapper.map(fileContent, FileContentResponseDto.class);
 
         // upload to S3
         try {
-            awsS3Component.setUploadS3File(uploadFile, fileContentDto);
+            awsS3Component.setUploadS3File(uploadFile, fileContentResponseDto);
         } catch (IOException e) {
             ErrorLogUtils.printError(log, e);
             return null;
         }
 
-        return fileContentDto;
+        return fileContentResponseDto;
+    }
+
+    /**
+     * 파일 경로 생성
+     * root/fileType/yyyyMMdd/
+     *
+     * @param fileType
+     * @return
+     */
+    private String generateFilePath(FileTypes fileType) {
+        LocalDate nowDate = LocalDate.now();
+        String datePath = String.valueOf(nowDate.getYear())
+                + nowDate.getMonthValue()
+                + nowDate.getDayOfMonth()
+                + CommonConstants.SLASH;
+
+        return fileType.getPath() + datePath;
     }
 
 }

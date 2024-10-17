@@ -2,11 +2,13 @@ package com.dylabo.dydev.domain.file.enums;
 
 import com.dylabo.core.common.annotation.EnumFindable;
 import com.dylabo.core.common.enums.EnumMapperType;
+import com.dylabo.dydev.common.components.AWSS3Component;
 
 @EnumFindable
 public enum FileTypes implements EnumMapperType {
-    FEED("피드"),
-    EDITOR("에디터");
+    TEMP("TEMP"),
+    FEED("FEED"),
+    EDITOR("EDITOR");
 
     private String value;
 
@@ -26,8 +28,9 @@ public enum FileTypes implements EnumMapperType {
 
     public String getPath() {
         return switch (this) {
-            case FEED -> "dylabo/feed/";
-            case EDITOR -> "dylabo/editor/";
+            case TEMP -> AWSS3Component.S3_ROOT_FILE_PATH + "temp/";
+            case FEED -> AWSS3Component.S3_ROOT_FILE_PATH + "feed/";
+            case EDITOR -> AWSS3Component.S3_ROOT_FILE_PATH + "editor/";
         };
     }
 

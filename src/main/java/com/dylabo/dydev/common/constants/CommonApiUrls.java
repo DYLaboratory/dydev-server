@@ -11,6 +11,7 @@ public class CommonApiUrls {
     public static final String API_PACKAGE_PREFIX_ADMIN = "/admin";
     public static final String API_PACKAGE_PREFIX_COMMON = "/common";
 
+    /* package */
     public static final String API_PACKAGE_FILE = "/file";
     public static final String API_PACKAGE_SESSION  = "/session";
     public static final String API_PACKAGE_USER  = "/user";

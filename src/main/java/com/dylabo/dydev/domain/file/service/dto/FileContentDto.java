@@ -20,4 +20,6 @@ public class FileContentDto extends BaseCDto {
 
     private Boolean isPrivate;
 
+    private Integer seq;
+
 }
