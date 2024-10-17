@@ -16,4 +16,11 @@ public class FileContentResponseDto extends FileContentDto {
         private String fileName;
     }
 
+    @Getter
+    public static class FileInfoDto {
+        private Long id;
+
+        private String fileExt;
+    }
+
 }

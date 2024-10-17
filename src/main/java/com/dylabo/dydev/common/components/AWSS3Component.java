@@ -9,14 +9,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.DeleteObjectRequest;
-import software.amazon.awssdk.services.s3.model.GetObjectRequest;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * AWS S3 관련 컴포넌트
@@ -92,9 +92,7 @@ public class AWSS3Component {
      * @param fileContentDto
      */
     public void setDeleteS3File(FileContentDto fileContentDto) {
-        String filePath = fileContentDto.getFilePath()
-                + File.separator
-                + fileContentDto.getSystemFileName();
+        String filePath = generateFilePath(fileContentDto);
 
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
                 .bucket(bucketName)
@@ -102,6 +100,34 @@ public class AWSS3Component {
                 .build();
 
         s3Client.deleteObject(deleteObjectRequest);
+    }
+
+    /**
+     * S3 파일 다건 삭제
+     * 
+     * @param fileContentDtoList
+     */
+    public void setDeleteS3Files(List<FileContentDto> fileContentDtoList) {
+        Delete delete = Delete.builder()
+                .objects(fileContentDtoList.stream()
+                        .map(f -> ObjectIdentifier.builder()
+                                .key(generateFilePath(f))
+                                .build())
+                        .collect(Collectors.toList()))
+                .build();
+
+        DeleteObjectsRequest deleteObjectsRequest = DeleteObjectsRequest.builder()
+                .bucket(bucketName)
+                .delete(delete)
+                .build();
+
+        s3Client.deleteObjects(deleteObjectsRequest);
+    }
+
+    private String generateFilePath(FileContentDto fileContentDto) {
+        return fileContentDto.getFilePath()
+                + File.separator
+                + fileContentDto.getSystemFileName();
     }
 
 }

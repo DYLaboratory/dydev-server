@@ -10,6 +10,7 @@ import com.dylabo.dydev.domain.file.entity.FileContent;
 import com.dylabo.dydev.domain.file.enums.FileTypes;
 import com.dylabo.dydev.domain.file.repository.FileContentRepository;
 import com.dylabo.dydev.domain.file.service.FileService;
+import com.dylabo.dydev.domain.file.service.dto.FileContentDto;
 import com.dylabo.dydev.domain.file.service.dto.FileContentResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -67,14 +71,34 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional
-    public FileContentResponseDto setUploadFile(FileTypes fileType, MultipartFile uploadFile) {
-        return setUploadFile(fileType, uploadFile, null);
+    public FileContentResponseDto setUploadFiles(FileTypes fileType, MultipartFile uploadFile) {
+        return setUploadFiles(fileType, uploadFile, null);
     }
 
     @Override
     @Transactional
-    public FileContentResponseDto setUploadFile(FileTypes fileType, MultipartFile uploadFile, Long relationId) {
-        if (uploadFile.isEmpty() || CommonObjectUtils.isNull(uploadFile.getOriginalFilename())) {
+    public FileContentResponseDto setUploadFiles(FileTypes fileType, MultipartFile uploadFile, Long relationId) {
+        if (CommonObjectUtils.isNull(uploadFile)
+                || uploadFile.isEmpty()
+                || CommonObjectUtils.isNull(uploadFile.getOriginalFilename())) {
+            throw new ApiException(DydevErrorMessage.EMPTY_FILE);
+        }
+
+        List<FileContentResponseDto> uploadFiles = setUploadFiles(fileType, List.of(uploadFile), relationId);
+
+        return uploadFiles.isEmpty() ? null : uploadFiles.get(0);
+    }
+
+    @Override
+    @Transactional
+    public List<FileContentResponseDto> setUploadFiles(FileTypes fileType, List<MultipartFile> uploadFiles) {
+        return setUploadFiles(fileType, uploadFiles, null);
+    }
+
+    @Override
+    @Transactional
+    public List<FileContentResponseDto> setUploadFiles(FileTypes fileType, List<MultipartFile> uploadFiles, Long relationId) {
+        if (uploadFiles.isEmpty()) {
             throw new ApiException(DydevErrorMessage.EMPTY_FILE);
         }
 
@@ -84,45 +108,89 @@ public class FileServiceImpl implements FileService {
             relationId = null; // file type 없이 relation 불가능
         }
 
-        // file info
-        String originalFileName = uploadFile.getOriginalFilename(); // 원본 파일명
-        String fileExt = originalFileName.substring(originalFileName.lastIndexOf(".") + 1); // 확장자명 (확장자 없는 파일 등록 불가)
-        String systemFileName = UUID.randomUUID().toString().replaceAll("-", "")
-                + CommonConstants.UNDER_BAR
-                + System.currentTimeMillis()
-                + CommonConstants.DOT
-                + fileExt; // 시스템 파일명
-        String filePath = generateFilePath(fileType); // 파일 경로
+        List<FileContentResponseDto> fileContentList = new ArrayList<>();
 
-        String contentType = uploadFile.getContentType();
-        long fileSize = uploadFile.getSize();
-
-        // set fileContent
-        FileContent fileContent = FileContent.builder()
-                .originalFileName(originalFileName)
-                .systemFileName(systemFileName)
-                .filePath(filePath)
-                .fileExt(fileExt)
-                .contentType(contentType)
-                .fileSize(fileSize)
-                .fileType(fileType)
-                .relationId(relationId)
-                .build();
-
-        // save db
-        fileContent = fileContentRepository.save(fileContent);
-
-        FileContentResponseDto fileContentResponseDto = modelMapper.map(fileContent, FileContentResponseDto.class);
-
-        // upload to S3
         try {
-            awsS3Component.setUploadS3File(uploadFile, fileContentResponseDto);
-        } catch (IOException e) {
-            ErrorLogUtils.printError(log, e);
-            return null;
+            for (MultipartFile uploadFile : uploadFiles) {
+                if (CommonObjectUtils.isNull(uploadFile)
+                        || uploadFile.isEmpty()
+                        || CommonObjectUtils.isNull(uploadFile.getOriginalFilename())) {
+                    throw new ApiException(DydevErrorMessage.EMPTY_FILE);
+                }
+
+                // file info
+                String originalFileName = uploadFile.getOriginalFilename(); // 원본 파일명
+                String fileExt = originalFileName.substring(originalFileName.lastIndexOf(".") + 1); // 확장자명 (확장자 없는 파일 등록 불가)
+                String systemFileName = UUID.randomUUID().toString().replaceAll("-", "")
+                        + CommonConstants.UNDER_BAR
+                        + System.currentTimeMillis()
+                        + CommonConstants.DOT
+                        + fileExt; // 시스템 파일명
+                String filePath = generateFilePath(fileType); // 파일 경로
+
+                String contentType = uploadFile.getContentType();
+                long fileSize = uploadFile.getSize();
+
+                // set fileContent
+                FileContent fileContent = FileContent.builder()
+                        .originalFileName(originalFileName)
+                        .systemFileName(systemFileName)
+                        .filePath(filePath)
+                        .fileExt(fileExt)
+                        .contentType(contentType)
+                        .fileSize(fileSize)
+                        .fileType(fileType)
+                        .relationId(relationId)
+                        .build();
+
+                // save db
+                fileContent = fileContentRepository.save(fileContent);
+
+                FileContentResponseDto fileContentResponseDto = modelMapper.map(fileContent, FileContentResponseDto.class);
+
+                // upload to S3
+                try {
+                    awsS3Component.setUploadS3File(uploadFile, fileContentResponseDto);
+                    fileContentList.add(fileContentResponseDto);
+                } catch (IOException e) {
+                    ErrorLogUtils.printError(log, e);
+                }
+            }
+        } catch (Exception e) {
+            // 에러나면 업로드한 파일 삭제
+            for (FileContentDto fileContentDto : fileContentList) {
+                awsS3Component.setDeleteS3File(fileContentDto);
+            }
         }
 
-        return fileContentResponseDto;
+        return fileContentList;
+    }
+
+    @Override
+    @Transactional
+    public void setDeleteFileById(Long fileId) {
+        FileContentResponseDto fileContentResponseDto = getFileContentById(fileId);
+
+        // delete from db
+        fileContentRepository.deleteById(fileId);
+
+        // delete file
+        awsS3Component.setDeleteS3File(fileContentResponseDto);
+    }
+
+    @Override
+    @Transactional
+    public void setDeleteFilesByRelation(FileTypes fileType, Long relationId) {
+        List<FileContent> fileContentList = fileContentRepository.findByFileTypeAndRelationId(fileType, relationId);
+
+        // delete from db
+        fileContentRepository.deleteByFileTypeAndRelationId(fileType, relationId);
+
+        // delete files
+        awsS3Component.setDeleteS3Files(fileContentList.stream()
+                .map(f -> modelMapper.map(f, FileContentDto.class))
+                .collect(Collectors.toList())
+        );
     }
 
     /**

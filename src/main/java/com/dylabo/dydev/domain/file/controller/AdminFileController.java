@@ -25,7 +25,7 @@ public class AdminFileController {
     public ResponseEntity<FileContentResponseDto> doSetUploadFile(
             @RequestPart(value = "fileType") FileTypes fileType,
             @RequestPart(value = "uploadFile") MultipartFile uploadFile) {
-        FileContentResponseDto responseDto = fileService.setUploadFile(fileType, uploadFile);
+        FileContentResponseDto responseDto = fileService.setUploadFiles(fileType, uploadFile);
 
         if (CommonObjectUtils.nonNull(responseDto)) {
             return new ResponseEntity<>(responseDto, HttpStatus.OK);
