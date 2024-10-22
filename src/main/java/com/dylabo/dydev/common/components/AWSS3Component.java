@@ -1,7 +1,9 @@
 package com.dylabo.dydev.common.components;
 
+import com.dylabo.core.common.constants.CommonConstants;
 import com.dylabo.core.common.utils.ErrorLogUtils;
 import com.dylabo.dydev.domain.file.service.dto.FileContentDto;
+import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,7 +14,6 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.List;
@@ -26,13 +27,20 @@ import java.util.stream.Collectors;
 @Slf4j
 public class AWSS3Component {
 
-    @Value("${aws.s3.root-path}")
-    public static String S3_ROOT_FILE_PATH;
-
     private final S3Client s3Client;
 
     @Value("${aws.s3.bucket}")
     private String bucketName;
+
+    @Value("${aws.s3.root-path}")
+    private String s3RootFilePath;
+
+    public static String S3_ROOT_FILE_PATH;
+
+    @PostConstruct
+    public void init() {
+        S3_ROOT_FILE_PATH = s3RootFilePath;
+    }
 
     /**
      * S3 파일 다운로드
@@ -73,9 +81,7 @@ public class AWSS3Component {
      * @throws IOException
      */
     public void setUploadS3File(MultipartFile uploadFile, FileContentDto fileContentDto) throws IOException {
-        String filePath = fileContentDto.getFilePath()
-                + File.separator
-                + fileContentDto.getSystemFileName();
+        String filePath = fileContentDto.getFilePath() + fileContentDto.getSystemFileName();
 
         PutObjectRequest putObjectRequest = PutObjectRequest.builder()
                 .bucket(bucketName)
@@ -104,7 +110,7 @@ public class AWSS3Component {
 
     /**
      * S3 파일 다건 삭제
-     * 
+     *
      * @param fileContentDtoList
      */
     public void setDeleteS3Files(List<FileContentDto> fileContentDtoList) {
@@ -126,7 +132,7 @@ public class AWSS3Component {
 
     private String generateFilePath(FileContentDto fileContentDto) {
         return fileContentDto.getFilePath()
-                + File.separator
+                + CommonConstants.SLASH
                 + fileContentDto.getSystemFileName();
     }
 
