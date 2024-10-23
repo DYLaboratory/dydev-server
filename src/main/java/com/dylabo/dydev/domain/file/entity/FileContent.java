@@ -67,6 +67,10 @@ public class FileContent extends BaseCEntity implements Comparable<FileContent> 
         isPrivate = aPrivate;
     }
 
+    public void updateSeq(int seq) {
+        this.seq = seq;
+    }
+
     public void setRelationId(Long relationId) {
         this.relationId = relationId;
     }

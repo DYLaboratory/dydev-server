@@ -8,7 +8,7 @@ import java.util.List;
 
 public interface FileContentRepository extends JpaRepository<FileContent, Long> {
 
-    List<FileContent> findByFileTypeAndRelationId(FileTypes fileType, Long relationId);
+    List<FileContent> findByFileTypeAndRelationIdOrderBySeqAsc(FileTypes fileType, Long relationId);
 
     void deleteByFileTypeAndRelationId(FileTypes fileType, Long relationId);
 

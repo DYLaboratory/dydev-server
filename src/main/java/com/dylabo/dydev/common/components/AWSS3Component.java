@@ -42,6 +42,20 @@ public class AWSS3Component {
         S3_ROOT_FILE_PATH = s3RootFilePath;
     }
 
+    public GetObjectRequest getS3ObjectRequest(String filePath, String fileName) {
+        // 파일 경로 + 이름
+        fileName = filePath + fileName;
+
+        return GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key(fileName)
+                .build();
+    }
+
+    public InputStream getS3InputStream(String filePath, String fileName) {
+        return s3Client.getObject(getS3ObjectRequest(filePath, fileName));
+    }
+
     /**
      * S3 파일 다운로드
      *
@@ -49,13 +63,7 @@ public class AWSS3Component {
      * @param fileName
      */
     public byte[] getDownloadS3FileByName(String filePath, String fileName) {
-        // 파일 경로 + 이름
-        fileName = filePath + fileName;
-
-        GetObjectRequest getObjectRequest = GetObjectRequest.builder()
-                .bucket(bucketName)
-                .key(fileName)
-                .build();
+        GetObjectRequest getObjectRequest = getS3ObjectRequest(filePath, fileName);
 
         try (InputStream is = s3Client.getObject(getObjectRequest);
              ByteArrayOutputStream os = new ByteArrayOutputStream()) {
@@ -97,7 +105,7 @@ public class AWSS3Component {
      *
      * @param fileContentDto
      */
-    public void setDeleteS3File(FileContentDto fileContentDto) {
+    public <T extends FileContentDto> void setDeleteS3File(T fileContentDto) {
         String filePath = generateFilePath(fileContentDto);
 
         DeleteObjectRequest deleteObjectRequest = DeleteObjectRequest.builder()
@@ -113,7 +121,7 @@ public class AWSS3Component {
      *
      * @param fileContentDtoList
      */
-    public void setDeleteS3Files(List<FileContentDto> fileContentDtoList) {
+    public <T extends FileContentDto> void setDeleteS3Files(List<T> fileContentDtoList) {
         Delete delete = Delete.builder()
                 .objects(fileContentDtoList.stream()
                         .map(f -> ObjectIdentifier.builder()

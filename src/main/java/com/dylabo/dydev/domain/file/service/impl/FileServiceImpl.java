@@ -11,15 +11,18 @@ import com.dylabo.dydev.domain.file.enums.FileTypes;
 import com.dylabo.dydev.domain.file.repository.FileContentRepository;
 import com.dylabo.dydev.domain.file.service.FileService;
 import com.dylabo.dydev.domain.file.service.dto.FileContentDto;
+import com.dylabo.dydev.domain.file.service.dto.FileContentRequestDto;
 import com.dylabo.dydev.domain.file.service.dto.FileContentResponseDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
+import org.springframework.core.io.InputStreamResource;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +30,7 @@ import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,6 +54,36 @@ public class FileServiceImpl implements FileService {
         FileContent fileContent = getEntityFileContentById(fileId);
 
         return modelMapper.map(fileContent, FileContentResponseDto.class);
+    }
+
+    @Override
+    public List<FileContentResponseDto> getFileContentListById(List<Long> fileIds) {
+        List<FileContent> fileContentList = fileContentRepository.findAllById(fileIds);
+
+        return fileContentList.stream()
+                .map(file -> modelMapper.map(file, FileContentResponseDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public List<FileContentResponseDto> getFileContentListByRelationId(FileTypes fileType, Long relationId) {
+        List<FileContent> fileContentList = fileContentRepository.findByFileTypeAndRelationIdOrderBySeqAsc(fileType, relationId);
+
+        return fileContentList.stream()
+                .map(file -> modelMapper.map(file, FileContentResponseDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    public FileContentResponseDto.FileImageDto getImageFileResource(Long fileId) {
+        FileContent fileContent = getEntityFileContentById(fileId);
+
+        InputStream is = awsS3Component.getS3InputStream(fileContent.getFilePath(), fileContent.getSystemFileName());
+
+        return FileContentResponseDto.FileImageDto.builder()
+                .isr(new InputStreamResource(is))
+                .contentType(fileContent.getContentType())
+                .build();
     }
 
     @Override
@@ -98,12 +132,29 @@ public class FileServiceImpl implements FileService {
     @Override
     @Transactional
     public List<FileContentResponseDto> setUploadFiles(FileTypes fileType, List<MultipartFile> uploadFiles, Long relationId) {
+        AtomicInteger idx = new AtomicInteger(1);
+
+        return setUploadFilesWithSeq(
+                fileType,
+                uploadFiles.stream()
+                        .map(file -> FileContentRequestDto.FileUploadDto.builder()
+                                .uploadFile(file)
+                                .seq(idx.getAndIncrement())
+                                .build())
+                        .collect(Collectors.toList()),
+                relationId
+        );
+    }
+
+    @Override
+    @Transactional
+    public List<FileContentResponseDto> setUploadFilesWithSeq(FileTypes fileType, List<FileContentRequestDto.FileUploadDto> uploadFiles, Long relationId) {
         if (uploadFiles.isEmpty()) {
             throw new ApiException(DydevErrorMessage.EMPTY_FILE);
         }
 
         // file type 없을 경우 임시 파일로 저장
-        if (CommonObjectUtils.isNull(fileType)) {
+        if (CommonObjectUtils.isNull(fileType) || fileType == FileTypes.TEMP) {
             fileType = FileTypes.TEMP;
             relationId = null; // file type 없이 relation 불가능
         }
@@ -111,7 +162,9 @@ public class FileServiceImpl implements FileService {
         List<FileContentResponseDto> fileContentList = new ArrayList<>();
 
         try {
-            for (MultipartFile uploadFile : uploadFiles) {
+            for (FileContentRequestDto.FileUploadDto uploadFileDto : uploadFiles) {
+                MultipartFile uploadFile = uploadFileDto.getUploadFile();
+
                 if (CommonObjectUtils.isNull(uploadFile)
                         || uploadFile.isEmpty()
                         || CommonObjectUtils.isNull(uploadFile.getOriginalFilename())) {
@@ -141,6 +194,7 @@ public class FileServiceImpl implements FileService {
                         .fileSize(fileSize)
                         .fileType(fileType)
                         .relationId(relationId)
+                        .seq(uploadFileDto.getSeq())
                         .build();
 
                 // save db
@@ -168,6 +222,27 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional
+    public List<FileContentResponseDto> setUpdateFileSeq(List<FileContentRequestDto.FileSeqDto> fileSeqDtoList) {
+        // get
+        List<FileContent> fileContents = fileContentRepository.findAllById(fileSeqDtoList.stream()
+                .map(FileContentRequestDto.FileSeqDto::getId)
+                .collect(Collectors.toList()));
+
+        // update
+        fileContents.forEach(file -> file.updateSeq(
+                fileSeqDtoList.stream()
+                        .filter(dto -> dto.getId().equals(file.getId()))
+                        .findFirst().get().getSeq()
+        ));
+
+        // return
+        return fileContents.stream()
+                .map(file -> modelMapper.map(file, FileContentResponseDto.class))
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
     public void setDeleteFileById(Long fileId) {
         FileContentResponseDto fileContentResponseDto = getFileContentById(fileId);
 
@@ -180,17 +255,26 @@ public class FileServiceImpl implements FileService {
 
     @Override
     @Transactional
+    public void setDeleteFilesById(List<Long> fileIds) {
+        List<FileContentResponseDto> fileContentResponseDtoList = getFileContentListById(fileIds);
+
+        // delete from db
+        fileContentRepository.deleteAllById(fileIds);
+
+        // delete files
+        awsS3Component.setDeleteS3Files(fileContentResponseDtoList);
+    }
+
+    @Override
+    @Transactional
     public void setDeleteFilesByRelation(FileTypes fileType, Long relationId) {
-        List<FileContent> fileContentList = fileContentRepository.findByFileTypeAndRelationId(fileType, relationId);
+        List<FileContentResponseDto> fileContentList = getFileContentListByRelationId(fileType, relationId);
 
         // delete from db
         fileContentRepository.deleteByFileTypeAndRelationId(fileType, relationId);
 
         // delete files
-        awsS3Component.setDeleteS3Files(fileContentList.stream()
-                .map(f -> modelMapper.map(f, FileContentDto.class))
-                .collect(Collectors.toList())
-        );
+        awsS3Component.setDeleteS3Files(fileContentList);
     }
 
     /**

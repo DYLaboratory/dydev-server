@@ -4,7 +4,7 @@ import com.dylabo.core.domain.base.dto.BaseCDto;
 import lombok.Getter;
 
 @Getter
-public class FileContentDto extends BaseCDto {
+public class FileContentDto extends BaseCDto implements Comparable<FileContentDto> {
 
     private String originalFileName;
 
@@ -21,5 +21,10 @@ public class FileContentDto extends BaseCDto {
     private Boolean isPrivate;
 
     private Integer seq;
+
+    @Override
+    public int compareTo(FileContentDto o) {
+        return this.seq.compareTo(o.getSeq());
+    }
 
 }
