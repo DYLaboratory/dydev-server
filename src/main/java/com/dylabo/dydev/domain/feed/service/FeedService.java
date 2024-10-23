@@ -12,6 +12,8 @@ public interface FeedService {
 
     FeedResponseDto setInsertFeed(FeedRequestDto feedRequestDto, List<MultipartFile> uploadFiles);
 
+    FeedResponseDto setUpdateFeed(Long feedId, FeedRequestDto.UpdateDto feedRequestDto, List<MultipartFile> uploadFiles);
+
     Long setDeleteFeed(Long id);
 
 }
