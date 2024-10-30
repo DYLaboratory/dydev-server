@@ -1,4 +1,4 @@
-package com.dylabo.dydev.domain.history.service.dto;
+package com.dylabo.dydev.domain.history.service.dto.loginhistory;
 
 import lombok.Getter;
 

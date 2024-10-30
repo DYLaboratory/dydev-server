@@ -2,7 +2,7 @@ package com.dylabo.dydev.domain.history.controller;
 
 import com.dylabo.dydev.common.constants.CommonApiUrls;
 import com.dylabo.dydev.domain.history.service.LoginHistoryService;
-import com.dylabo.dydev.domain.history.service.dto.LoginHistoryResponseDto;
+import com.dylabo.dydev.domain.history.service.dto.loginhistory.LoginHistoryResponseDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;

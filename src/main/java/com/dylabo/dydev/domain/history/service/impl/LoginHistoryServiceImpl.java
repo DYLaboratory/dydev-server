@@ -10,7 +10,7 @@ import com.dylabo.dydev.domain.history.entity.LoginHistory;
 import com.dylabo.dydev.domain.history.enums.LoginHistoryMessage;
 import com.dylabo.dydev.domain.history.repository.LoginHistoryRepository;
 import com.dylabo.dydev.domain.history.service.LoginHistoryService;
-import com.dylabo.dydev.domain.history.service.dto.LoginHistoryResponseDto;
+import com.dylabo.dydev.domain.history.service.dto.loginhistory.LoginHistoryResponseDto;
 import com.dylabo.dydev.domain.user.entity.User;
 import com.dylabo.dydev.domain.user.service.UserService;
 import lombok.RequiredArgsConstructor;

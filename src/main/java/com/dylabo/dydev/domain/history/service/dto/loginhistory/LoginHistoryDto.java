@@ -1,4 +1,4 @@
-package com.dylabo.dydev.domain.history.service.dto;
+package com.dylabo.dydev.domain.history.service.dto.loginhistory;
 
 import com.dylabo.core.domain.base.dto.BaseCDto;
 import com.dylabo.dydev.domain.history.enums.LoginHistoryMessage;
