@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface FeedRepository extends JpaRepository<Feed, Long> {
 
-    List<Feed> findByCreateDateTimeAfter(LocalDateTime standardDateTime);
+    List<Feed> findByCreateDateTimeAfterOrderByCreateDateTimeDesc(LocalDateTime standardDateTime);
 
 }

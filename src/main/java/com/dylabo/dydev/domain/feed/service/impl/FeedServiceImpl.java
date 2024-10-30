@@ -45,7 +45,7 @@ public class FeedServiceImpl implements FeedService {
 
     @Override
     public List<FeedResponseDto> getRecentFeedList() {
-        return feedRepository.findByCreateDateTimeAfter(FEED_STANDARD_DATE_TIME).stream()
+        return feedRepository.findByCreateDateTimeAfterOrderByCreateDateTimeDesc(FEED_STANDARD_DATE_TIME).stream()
                 .map(feed -> {
                     FeedResponseDto feedResponseDto = modelMapper.map(feed, FeedResponseDto.class);
 
