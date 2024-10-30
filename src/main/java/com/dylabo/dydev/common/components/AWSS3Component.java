@@ -139,9 +139,7 @@ public class AWSS3Component {
     }
 
     private String generateFilePath(FileContentDto fileContentDto) {
-        return fileContentDto.getFilePath()
-                + CommonConstants.SLASH
-                + fileContentDto.getSystemFileName();
+        return fileContentDto.getFilePath() + fileContentDto.getSystemFileName();
     }
 
 }
