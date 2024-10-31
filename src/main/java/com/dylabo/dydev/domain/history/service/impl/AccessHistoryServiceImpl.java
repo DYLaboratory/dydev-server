@@ -4,6 +4,7 @@ import com.dylabo.core.common.utils.CommonRequestUtils;
 import com.dylabo.dydev.domain.history.entity.AccessHistory;
 import com.dylabo.dydev.domain.history.repository.AccessHistoryRepository;
 import com.dylabo.dydev.domain.history.service.AccessHistoryService;
+import com.dylabo.dydev.domain.history.service.dto.accesshistory.AccessHistoryRequestDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.modelmapper.ModelMapper;
@@ -32,17 +33,16 @@ public class AccessHistoryServiceImpl implements AccessHistoryService {
 
     @Override
     @Transactional
-    public void setInsertAccessHistory() {
+    public void setInsertAccessHistory(AccessHistoryRequestDto accessHistoryRequestDto) {
         String accessIp = CommonRequestUtils.getClientIp();
 
-        List<AccessHistory> accessHistoryList = getAccessHistoryList(accessIp);
+//        List<AccessHistory> accessHistoryList = getAccessHistoryList(accessIp);
 
-        if (accessHistoryList.size() < 5) {
-            AccessHistory accessHistory = AccessHistory.builder()
-                    .accessIp(accessIp)
-                    .build();
+        AccessHistory accessHistory = AccessHistory.builder()
+                .accessIp(accessIp)
+                .url(accessHistoryRequestDto.getUrl())
+                .build();
 
-            accessHistoryRepository.save(accessHistory);
-        }
+        accessHistoryRepository.save(accessHistory);
     }
 }

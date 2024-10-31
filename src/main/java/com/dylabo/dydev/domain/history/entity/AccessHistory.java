@@ -26,4 +26,8 @@ public class AccessHistory extends BaseCEntity {
     @NotNull
     private String accessIp;
 
+    @Column
+    @NotNull
+    private String url;
+
 }
