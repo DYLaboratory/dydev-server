@@ -70,6 +70,7 @@ public class AuthServiceImpl implements AuthService {
         // 세션 설정
         SessionDto sessionDto = SessionDto.builder()
                 .isAdmin(user.getUserType() == UserTypes.ADMIN || user.getUserType() == UserTypes.SUPER)
+                .isSuper(user.getUserType() == UserTypes.SUPER)
                 .userId(user.getUserId())
                 .userType(user.getUserType())
                 .name(user.getName())

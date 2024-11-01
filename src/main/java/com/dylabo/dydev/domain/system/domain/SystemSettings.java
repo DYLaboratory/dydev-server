@@ -1,7 +1,8 @@
-package com.dylabo.dydev.domain.notice.entity;
+package com.dylabo.dydev.domain.system.domain;
 
 import com.dylabo.core.domain.base.entity.BaseCUEntity;
-import com.dylabo.dydev.domain.notice.enums.NoticeTypes;
+import com.dylabo.dydev.common.enums.SystemLanguageTypes;
+import com.dylabo.dydev.common.enums.SystemThemeTypes;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -17,29 +18,29 @@ import org.hibernate.annotations.DynamicUpdate;
 @EqualsAndHashCode(callSuper = false)
 @Entity
 @Table(
-        name = "notice"
+        name = "system_settings"
 )
-public class Notice extends BaseCUEntity {
+public class SystemSettings extends BaseCUEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private final Long id = 0L;
 
+    @Column(length = 10)
+    private String version;
+
     @Enumerated(EnumType.STRING)
     @NotNull
-    @Column(length = 30)
-    private NoticeTypes noticeType;
+    @Column(length = 10)
+    private SystemThemeTypes defaultTheme;
 
+    @Enumerated(EnumType.STRING)
     @NotNull
-    @Column(length = 200)
-    private String title;
+    @Column(length = 10)
+    private SystemLanguageTypes defaultLang;
 
-    @NotNull
-    @Column(length = 40000)
-    private String content;
-
-    @Column(columnDefinition = "integer default 0")
+    @Column(columnDefinition = "integer default 3")
     @Builder.Default
-    private Integer viewCount = 0;
+    private Integer feedDays = 3;
 
 }

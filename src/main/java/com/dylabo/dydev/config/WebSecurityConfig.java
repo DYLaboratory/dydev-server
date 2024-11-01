@@ -54,6 +54,10 @@ public class WebSecurityConfig {
                                 .requestMatchers("/auth/sign-in", "/session/user")
                                 .permitAll()
 
+                                // system
+                                .requestMatchers("/system/**")
+                                .hasAnyRole(UserTypes.SUPER.getKey())
+
                                 // admin
                                 .requestMatchers("/admin/**")
                                 .hasAnyRole(UserTypes.ADMIN.getKey(), UserTypes.SUPER.getKey())

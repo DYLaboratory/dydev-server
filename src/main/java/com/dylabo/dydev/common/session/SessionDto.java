@@ -12,6 +12,8 @@ public class SessionDto {
 
     private Boolean isAdmin;
 
+    private Boolean isSuper;
+
     private String userId;
 
     private UserTypes userType;
